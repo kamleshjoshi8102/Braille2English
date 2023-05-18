@@ -62,7 +62,7 @@ def upload_page():
             file.save(file_path)
 
             # Call the OCR function on the saved file
-            extracted_text = ocr_core(filename)
+            extracted_text = ocr_core(file_path)
 
             # Extract the text and display it
             return render_template('upload.html',
@@ -75,6 +75,7 @@ def upload_page():
 
 
 def ocr_core(img_path):
+    print("Image Path:", img_path)
     img = cv2.imread(img_path)
     h,w,c = img.shape
     print("height: ",h , " width : ", w) # h,w
