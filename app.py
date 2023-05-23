@@ -39,7 +39,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # route and function to handle the home page
-@app.route('/')
+@app.route('/home')
 def home_page():  
     return render_template('index.html')
 
