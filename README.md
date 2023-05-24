@@ -4,6 +4,7 @@ This project is a web application that translates Braille text into English. It 
 
 ***
 ![Home](templates/ScreenShots/Text2Braille.png)
+***
 ![Ouput-Image](templates/ScreenShots/ImageUpload.png)
 ***
 
