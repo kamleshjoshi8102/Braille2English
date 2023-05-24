@@ -18,10 +18,10 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="/home">Home <span class="sr-only"></span></a>
+          <a class="nav-link active" href="/home">English To Braille <span class="sr-only"></span></a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/upload">Braille Image 2 Text</a>
+        <li class="nav-item active">
+          <a class="nav-link" href="/upload">Braille Image To Text</a>
         </li>
     </div>
   </nav>
@@ -30,7 +30,7 @@
     {% if msg %}
     <h1 class="display-4">{{ msg }}</h1>
     {% endif %}
-    <h1>Upload new File</h1>
+    <h1>📁 Upload new File</h1>
       <form method="post" enctype="multipart/form-data">
         <div class="form-group">
           <!-- <label for="fileInput">Choose File:</label> -->

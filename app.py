@@ -49,11 +49,11 @@ def upload_page():
     if request.method == 'POST':
         # check if there is a file in the request
         if 'file' not in request.files:
-            return render_template('upload.html', msg='No file selected')
+            return render_template('upload.html', msg='📎 No file selected')
         file = request.files['file']
         # if no file is selected
         if file.filename == '':
-            return render_template('upload.html', msg='No file selected')
+            return render_template('upload.html', msg='📎 No file selected')
 
         if file and allowed_file(file.filename):
             # Save the file to the upload folder
@@ -66,7 +66,7 @@ def upload_page():
 
             # Extract the text and display it
             return render_template('upload.html',
-                                msg='Successfully processed',
+                                msg='✅ Successfully processed',
                                 extracted_text=extracted_text,
                                 img_src=UPLOAD_FOLDER + filename)
         
