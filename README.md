@@ -3,9 +3,12 @@
 This project is a web application that translates Braille text into English. It utilizes Flask, Python, HTML, CSS, and JavaScript to provide a user-friendly interface for translating Braille characters into their corresponding English alphabet. ✨
 
 ***
-![Home](templates/ScreenShots/Text2Braille.png)
+![Home](templates/ScreenShots/home.png)
 ***
-![Ouput-Image](templates/ScreenShots/ImageUpload.png)
+![Ouput-Image](templates/ScreenShots/upload.png)
+***
+
+![About](templates/ScreenShots/about.png)
 ***
 
 ## Features ✨
