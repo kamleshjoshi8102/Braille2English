@@ -43,6 +43,11 @@ def allowed_file(filename):
 def home_page():  
     return render_template('index.html')
 
+@app.route('/about')
+def about_page():  
+    return render_template('about.html')
+
+
 # route and function to handle the upload page
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_page():  
@@ -77,42 +82,109 @@ def upload_page():
 def ocr_core(img_path):
     print("Image Path:", img_path)
     img = cv2.imread(img_path)
+    # cv2_imshow(img)
+
     h,w,c = img.shape
     print("height: ",h , " width : ", w) # h,w
-    img_no=cv2.resize(img,(w,116))
+
+    div = h//3
+    img_no=img[0:div, :]  #h,w
+    #img_no=cv2.resize(img,(w,116))
+    # cv2_imshow(img_no)
     h1,w1,c1=img_no.shape
+    img_g=cv2.cvtColor(img_no,cv2.COLOR_BGR2GRAY)
 
-    sentence=""
-    alphabet = list(string.ascii_lowercase)
-    cur_pos = 0
-    target = {}
-    for letter in alphabet:
-        target[letter] = [0] * 27
-        target[letter][cur_pos] = 1
-        cur_pos += 1
-    target[' '] = [0] * 27
-    target[' '][26] = 1
+    kernal =np.ones((3,10),np.uint8)  
+    img_con= cv2.erode(img_g,kernal,iterations=2) 
+    # cv2_imshow(img_con)
+    _, binary_img = cv2.threshold(img_con, 127, 255, cv2.THRESH_BINARY)
+    # cv2_imshow(binary_img)
+    total_labels ,labels , stats,  centroid = cv2.connectedComponentsWithStats(~binary_img ,8,cv2.CV_32S)  #send inverted img : foreground must be white
+    no_letter=total_labels-1
+    print("no of letters",no_letter)
+    # cv2_imshow(~img_con)
+
+    dist=[]  #distance between connected components
+    centroid_p=[]
+    for label in range(1, total_labels):
+        component_image = np.zeros_like(img_con)
+        component_image[labels == label] = 255
+        component_stats = stats[label]
+        cent = centroid[label]
+
+        distance_l=component_stats[0]
+        dist.append(distance_l)
+        x_axis=cent[0]
+        centroid_p.append(x_axis)
+        
+    print(dist)
+
+    differences = []
+    for i in range(len(dist) - 1):
+        diff = dist[i+1] - dist[i]
+        differences.append(diff)
+
+    print(differences)
+
+    sort_x_dist=sorted(differences)
+    print(sort_x_dist)
 
 
-    for wid in range (0,w1,72):
-        img_crop=img_no[:, 0+wid:72+wid]
-        # cv2.imshow("zz",img_crop)
-        pred_img = cv2.resize(img_crop, (28,28),interpolation=cv2.INTER_CUBIC)   
-        # cv2.imshow("zz",pred_img)
+    ##to detect number of spaces 
+    unique_diff=sorted(set(differences))
+    print(unique_diff)
+    if(no_letter>1):
+        step_size=unique_diff[1]
+        print(step_size)
+
+        #####model
+
+        sentence=""
+        alphabet = list(string.ascii_lowercase)
+        cur_pos = 0
+        target = {}
+        for letter in alphabet:
+            target[letter] = [0] * 27
+            target[letter][cur_pos] = 1
+            cur_pos += 1
+        target[' '] = [0] * 27
+        target[' '][26] = 1
+
+        for wid in range (0,w1,step_size):
+            img_crop=img[:, 0+wid:step_size+wid]
+            pred_img = cv2.resize(img_crop, (28,28),interpolation=cv2.INTER_CUBIC)   
+            pred_img = pred_img.astype(np.float32)/255.0
+            pred_img = np.expand_dims(pred_img,axis=0)
+            pred_lb = model.predict(pred_img)
+            for j in range(len(pred_lb[0])):
+                    if pred_lb[0][j] > 0.6:
+                        pred_lb[0][j] = 1.0
+                    else:
+                        pred_lb[0][j] = 0.0
+            for key,value in target.items():
+                    if np.array_equal(np.asarray(pred_lb[0]),np.asarray(value)):
+                        sentence=sentence+key
+
+        print(sentence)
+    else:
+        pred_img=img
+        pred_img = cv2.resize(pred_img, (28,28)) 
+        pred_img = cv2.cvtColor(pred_img, cv2.COLOR_BGR2RGB)
+        # cv2_imshow(pred_img)
         pred_img = pred_img.astype(np.float32)/255.0
         pred_img = np.expand_dims(pred_img,axis=0)
+
         pred_lb = model.predict(pred_img)
         for j in range(len(pred_lb[0])):
                 if pred_lb[0][j] > 0.6:
                     pred_lb[0][j] = 1.0
                 else:
                     pred_lb[0][j] = 0.0
-
         for key,value in target.items():
-            if np.array_equal(np.asarray(pred_lb[0]),np.asarray(value)):
-                print(key)
-                sentence=sentence+key
-    
+                if np.array_equal(np.asarray(pred_lb[0]),np.asarray(value)):
+                    print(key)
+        sentence=sentence+key
+        
     print(sentence)
     return sentence
 
